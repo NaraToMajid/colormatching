@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>COLOR MATCHING</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── PROGRESS DOTS ── -->
+<div class="dots" id="game-dots" style="display:none">
+  <div class="dot" id="gd0"></div>
+  <div class="dot" id="gd1"></div>
+  <div class="dot" id="gd2"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════ MODAL: EDIT PROFILE ══════════ -->
+<div class="modal-overlay" id="modal-edit-profile">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">EDIT PROFIL</div>
+      <button class="modal-close" id="close-edit-profile">✕</button>
+    </div>
+    <div class="edit-form">
+      <div class="edit-avatar-section">
+        <div class="edit-av-preview" id="edit-av-preview">
+          <!-- filled by JS -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;opacity:.4;">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <button class="edit-avatar-btn" id="edit-avatar-btn">Ganti Foto Profil</button>
+        <input type="file" id="edit-avatar-input" accept="image/*">
+      </div>
+      <div class="field">
+        <label>Bio</label>
+        <textarea id="edit-bio" placeholder="Ceritakan sedikit tentang dirimu..." maxlength="120"></textarea>
+        <span id="bio-count" style="font-size:.58rem;color:var(--mu);text-align:right;">0/120</span>
+      </div>
+      <button class="btn btn-solid btn-full" id="btn-save-profile">SIMPAN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: VIEW PROFILE ══════════ -->
+<div class="modal-overlay" id="modal-view-profile">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">PROFIL</div>
+      <button class="modal-close" id="close-view-profile">✕</button>
+    </div>
+    <div id="modal-view-profile-content">
+      <div class="chat-loading">Memuat profil...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: CHAT ══════════ -->
+<div class="modal-overlay" id="modal-chat">
+  <div class="modal-box" style="display:flex;flex-direction:column;height:min(560px,85vh);">
+    <div class="modal-head" style="flex-shrink:0;">
+      <div class="modal-title" id="chat-modal-title">PESAN</div>
+      <button class="modal-close" id="close-chat">✕</button>
+    </div>
+    <div class="chat-modal-inner">
+      <div class="chat-target-bar">
+        Mengirim pesan ke <span id="chat-target-name">—</span>
+      </div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Ketik pesan..." maxlength="300" autocomplete="off">
+        <button class="chat-send" id="chat-send-btn">KIRIM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 0 — HOME ══════════ -->
+<div class="screen on" id="s0">
+  <div class="home-tag">Mini Game</div>
+  <div class="home-title">COLOR<br><span>MATCHING</span></div>
+  <div class="home-desc">
+    Hafal warna dalam <strong>5 detik</strong>, lalu cocokkan semirip mungkin
+    menggunakan slider RGB. Semakin mirip, semakin tinggi skormu.
+  </div>
+  <div class="home-user-bar" id="home-user-bar" style="display:none">
+    <span>Masuk sebagai <span class="hub-name" id="hub-name">—</span></span>
+    <button class="hub-out" id="hub-logout">Keluar</button>
+  </div>
+  <div class="home-btns">
+    <button class="btn btn-solid btn-full" id="btn-play">MAIN</button>
+    <button class="btn btn-ghost btn-full" id="btn-rec">REKOR DUNIA</button>
+    <button class="btn btn-ghost btn-full" id="btn-profile">PROFIL SAYA</button>
+    <button class="btn btn-danger btn-full" id="btn-quit">KELUAR</button>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN — PLAY PICKER ══════════ -->
+<div class="screen" id="s-pick">
+  <div class="pick-title">PILIH MODE</div>
+  <div class="pick-desc">Bermain dengan akun akan mencatat skormu ke papan Rekor Dunia.</div>
+  <div class="pick-btns">
+    <button class="btn btn-solid btn-full" id="btn-with-acc">MAIN DENGAN AKUN</button>
+    <button class="btn btn-ghost btn-full" id="btn-guest">MAIN SEBAGAI TAMU</button>
+    <button class="btn btn-ghost btn-full" id="btn-pick-back">KEMBALI</button>
+  </div>
+  <div class="pick-note">Tamu: skor tidak tercatat di rekor dunia.</div>
+</div>
+
+<!-- ══════════ SCREEN — AUTH ══════════ -->
+<div class="screen" id="s-auth">
+  <div class="auth-box">
+    <div class="auth-head">
+      <div class="auth-title" id="auth-title">DAFTAR</div>
+      <span class="auth-toggle" id="auth-toggle">Sudah punya akun?</span>
+    </div>
+    <div class="auth-fields">
+      <div class="field" id="field-uname">
+        <label>Username</label>
+        <input type="text" id="inp-user" placeholder="nama kamu" maxlength="20" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="field" id="field-confirm">
+        <label>Konfirmasi Password</label>
+        <input type="password" id="inp-conf" placeholder="••••••••" autocomplete="new-password">
+      </div>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+    <button class="btn btn-solid btn-full" id="btn-auth-submit">DAFTAR & MASUK</button>
+    <div class="auth-back" id="auth-back">← Kembali ke pilihan mode</div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN — WORLD RECORDS ══════════ -->
+<div class="screen" id="s-rec">
+  <div class="rec-wrap">
+    <div class="rec-head">
+      <div class="rec-title">REKOR DUNIA</div>
+      <button class="rec-back" id="rec-back">← Kembali</button>
+    </div>
+    <div class="rec-sub">Top 1000 — 1 Rekor Per Pemain</div>
+
+    <div class="rec-search-row">
+      <input type="text" id="rec-search-inp" placeholder="Cari username..." maxlength="20" autocomplete="off">
+      <button class="rec-search-btn" id="rec-search-btn">CARI</button>
+    </div>
+    <div class="rec-search-result" id="rec-search-result"></div>
+
+    <div id="rec-content"></div>
+    <button class="rec-load-more" id="rec-load-more" style="display:none">Muat lebih banyak...</button>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN — PROFILE ══════════ -->
+<div class="screen" id="s-profile">
+  <div class="prof-wrap">
+    <div class="prof-head">
+      <div class="prof-title">PROFIL</div>
+      <button class="prof-back" id="prof-back">← Kembali</button>
+    </div>
+    <div class="prof-card">
+      <div class="prof-avatar-wrap" id="prof-avatar-wrap">
+        <!-- placeholder -->
+        <div class="prof-avatar-ph" id="prof-avatar-ph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+        <img id="prof-avatar-img" class="prof-avatar-img" src="" alt="" style="display:none">
+        <div class="prof-avatar-edit">✎</div>
+      </div>
+      <div class="prof-info">
+        <div class="prof-username" id="prof-username">—</div>
+        <div class="prof-bio" id="prof-bio">
+          <span class="prof-bio-empty">Belum ada bio.</span>
+        </div>
+        <button class="prof-edit-btn" id="prof-edit-btn">Edit Profil</button>
+      </div>
+    </div>
+    <div class="prof-stats-row">
+      <div class="ps"><div class="ps-val" id="ps-games">—</div><div class="ps-lbl">Games</div></div>
+      <div class="ps"><div class="ps-val" id="ps-best">—</div><div class="ps-lbl">Best Score</div></div>
+      <div class="ps"><div class="ps-val" id="ps-rank">—</div><div class="ps-lbl">Rank</div></div>
+    </div>
+    <div class="prof-section-title">Riwayat Permainan</div>
+    <div class="prof-history" id="prof-history">
+      <div class="prof-empty">Memuat...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 1 — MEMORIZE ══════════ -->
+<div class="screen" id="s1">
+  <div id="color-flood"></div>
+  <div class="inner">
+    <div class="p1-lbl" id="p1lbl">Fase 1 — Hafal Warna</div>
+    <div class="ring-wrap">
+      <svg id="rsvg" viewBox="0 0 185 185" width="100%" height="100%">
+        <circle class="r-trk" id="r-trk" cx="92.5" cy="92.5" r="82"/>
+        <circle class="r-arc" id="r-arc" cx="92.5" cy="92.5" r="82"/>
+      </svg>
+      <div class="ring-inner">
+        <div class="r-sec" id="rsec">5</div>
+        <div class="r-ms"  id="rms">.000</div>
+        <div class="r-lbl" id="rlbl">detik tersisa</div>
+      </div>
+    </div>
+    <div class="p1-txt" id="p1txt">
+      Perhatikan warna ini.<br>Kamu punya <strong>5 detik</strong> untuk menghafalnya.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 2 — MATCH ══════════ -->
+<div class="screen" id="s2">
+  <div class="p2-wrap">
+    <div class="p2-top">
+      <div class="el-col">
+        <div class="el-n" id="elnum">0.00</div>
+        <div class="el-l">detik berlalu</div>
+      </div>
+    </div>
+    <div class="p2-circ" id="p2circ"></div>
+    <div class="p2-hex"  id="p2hex">#808080</div>
+    <div class="sliders">
+      <div class="sl-row">
+        <div class="sl-head">
+          <span class="sl-ch" style="color:#ff8585;">R — Red</span>
+          <span class="sl-val" id="rv" style="color:#ff8585;">128</span>
+        </div>
+        <input type="range" id="sr" min="0" max="255" value="128" style="accent-color:#ff4f4f;">
+      </div>
+      <div class="sl-row">
+        <div class="sl-head">
+          <span class="sl-ch" style="color:#85ff95;">G — Green</span>
+          <span class="sl-val" id="gv" style="color:#85ff95;">128</span>
+        </div>
+        <input type="range" id="sg" min="0" max="255" value="128" style="accent-color:#44ee66;">
+      </div>
+      <div class="sl-row">
+        <div class="sl-head">
+          <span class="sl-ch" style="color:#85aaff;">B — Blue</span>
+          <span class="sl-val" id="bv" style="color:#85aaff;">128</span>
+        </div>
+        <input type="range" id="sb" min="0" max="255" value="128" style="accent-color:#5599ff;">
+      </div>
+    </div>
+    <button class="go-btn" id="gobtn">COCOKKAN WARNA</button>
+  </div>
+</div>
+
+<!-- ══════════ SCREEN 3 — RESULTS ══════════ -->
+<div class="screen" id="s3">
+  <div class="r-wrap">
+    <div class="r-eye fa d1">Hasil Pencocokan</div>
+    <div class="r-ttl fa d2" id="rttl">BAGUS!</div>
+    <div class="compare fa d2">
+      <div class="cb">
+        <div class="cs" id="cst"></div>
+        <div class="cb-l">Target</div>
+        <div class="cb-h" id="csth">#000</div>
+      </div>
+      <div class="vs-t">VS</div>
+      <div class="cb">
+        <div class="cs" id="csy"></div>
+        <div class="cb-l">Kamu</div>
+        <div class="cb-h" id="csyh">#000</div>
+      </div>
+    </div>
+    <div class="bar-w fa d3">
+      <div class="bar-hd">
+        <span class="bar-l">Kemiripan</span>
+        <span class="bar-p" id="bpct">0%</span>
+      </div>
+      <div class="bar-trk"><div class="bar-fill" id="bfill"></div></div>
+    </div>
+    <div class="stats fa d4">
+      <div class="st" style="--ac:#e8c97e;"><div class="st-l">Skor</div><div class="st-v" id="rsc">—</div><div class="st-s">dari 10</div></div>
+      <div class="st" style="--ac:#85aaff;"><div class="st-l">Waktu</div><div class="st-v" id="rtm">—</div><div class="st-s">detik</div></div>
+      <div class="st" style="--ac:#85ff95;"><div class="st-l">Jarak RGB</div><div class="st-v" id="rds">—</div><div class="st-s">maks 441</div></div>
+    </div>
+    <div class="diffs fa d5">
+      <div class="df"><div class="df-l" style="color:#ff8585;">Red Δ</div><div class="df-v" id="drr" style="color:#ff8585;">—</div></div>
+      <div class="df"><div class="df-l" style="color:#85ff95;">Green Δ</div><div class="df-v" id="drg" style="color:#85ff95;">—</div></div>
+      <div class="df"><div class="df-l" style="color:#85aaff;">Blue Δ</div><div class="df-v" id="drb" style="color:#85aaff;">—</div></div>
+    </div>
+    <div class="r-btns fa d6">
+      <button class="btn play-btn" id="play-again">MAIN LAGI</button>
+      <button class="btn home-r-btn" id="back-home-res">HOME</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
